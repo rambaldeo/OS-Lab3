@@ -1,1 +1,1 @@
-# OS-Lab3
+# OS-Lab3 - Sudoku
