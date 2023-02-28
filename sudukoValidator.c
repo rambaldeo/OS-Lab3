@@ -30,7 +30,7 @@ void *printPuzzle(){
 	for (int i = 0; i < 9; i++){
 		printf("\n\n");
 		for (int j = 0; j < 9; j++){	
-			printf("%d   ", sudoku[i][j]);
+			printf(" %d  ", sudoku[i][j]);
 		}
 	}
 	pthread_exit(NULL);
@@ -114,8 +114,11 @@ void *checkSubGrid(void* param){
 
 int main(){	
 	pthread_t threads[thread_num];
-	
 	int threadIndex = 0;
+
+	printf("\n");
+	printf(R"(ⲯ﹍︿﹍ 𝚂𝚞𝚍𝚘𝚔𝚞 𝚅𝚊𝚕𝚒𝚍𝚊𝚝𝚘𝚛 ﹍ⲯ﹍︿﹍☼)");
+
 	pthread_create(&threads[threadIndex++], NULL, printPuzzle, NULL);
 
 	for (int i = 0; i < 9; i++){
