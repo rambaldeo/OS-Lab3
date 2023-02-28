@@ -28,9 +28,21 @@ int valid[thread_num] = {0};
 
 void *printPuzzle(){
 	for (int i = 0; i < 9; i++){
-		printf("\n\n");
+		if(i!=0 && i%3==0)
+			printf("\n-----------------------------\n");
+	
+		else if(i==0)
+			printf("\n\n");
+		
+		else
+		printf("\n         |         |         \n");
+
 		for (int j = 0; j < 9; j++){	
-			printf(" %d  ", sudoku[i][j]);
+			if(j!=0 && j%3==0){
+				printf("|");
+			}
+			printf(" %d ", sudoku[i][j]);
+
 		}
 	}
 	pthread_exit(NULL);
@@ -117,7 +129,7 @@ int main(){
 	int threadIndex = 0;
 
 	printf("\n");
-	printf(R"(ⲯ﹍︿﹍ 𝚂𝚞𝚍𝚘𝚔𝚞 𝚅𝚊𝚕𝚒𝚍𝚊𝚝𝚘𝚛 ﹍ⲯ﹍︿﹍☼)");
+	printf(R"(ⲯ﹍︿﹍𝚂𝚞𝚍𝚘𝚔𝚞 𝚅𝚊𝚕𝚒𝚍𝚊𝚝𝚘𝚛﹍ⲯ﹍☼)");
 
 	pthread_create(&threads[threadIndex++], NULL, printPuzzle, NULL);
 
