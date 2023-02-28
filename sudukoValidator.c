@@ -1,3 +1,11 @@
+// Operating Systems Lab 3
+// CRN: 74026 - Group 10
+// Instructor: Ghadeer Abdelkader
+// Group Members:
+// Darren Constantine - 100782701
+// Md Fardin Rahman - 100704517
+// Ram Baldeo Baldeo - 100701013
+
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
