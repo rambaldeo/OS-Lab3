@@ -3,69 +3,52 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define thread_num 27
+#define thread_num 28
 
+// structure used to pass data to threads
 typedef struct {
 	int row;
 	int column;		
 } parameters;
 
-int valid[thread_num] = {0};
 
 int sudoku[9][9] = {
-	{6, 2, 4, 5, 3, 9, 1, 8, 7},
-	{5, 1, 9, 7, 2, 8, 6, 3, 4},
-	{8, 3, 7, 6, 1, 4, 2, 9, 5},
-	{1, 4, 3, 8, 6, 5, 7, 2, 9},
-	{9, 5, 8, 2, 4, 7, 3, 6, 1},
-	{7, 6, 2, 3, 9, 1, 4, 5, 8},
-	{3, 7, 1, 9, 5, 6, 8, 4, 2},
-	{4, 9, 6, 1, 8, 2, 5, 7, 3},
-	{2, 8, 5, 4, 7, 3, 9, 1, 6}
+	{5, 3, 4, 6, 7, 8, 9, 1, 2},
+	{6, 7, 2, 1, 9, 5, 3, 4, 8},
+	{1, 9, 8, 3, 4, 2, 5, 6, 7},
+	{8, 5, 9, 7, 6, 1, 4, 2, 3},
+	{4, 2, 6, 8, 5, 3, 7, 9, 1},
+	{7, 1, 3, 9, 2, 4, 8, 5, 6},
+	{9, 6, 1, 5, 3, 7, 2, 8, 4},
+	{2, 8, 7, 4, 1, 9, 6, 3, 5},
+	{3, 4, 5, 2, 8, 6, 1, 7, 9}
 };
 
+int valid[thread_num] = {0};
 
-void *isColumnValid(void* param) {
-
-	parameters *params = (parameters*) param;
-	int row = params->row;
-	int col = params->column;		
-	if (row != 0 || col > 8) {
-		fprintf(stderr, "Invalid row or column for col subsection! row=%d, col=%d\n", row, col);
-		pthread_exit(NULL);
-	}
-
-
-	int validityArray[9] = {0};
-	int i;	
-	for (i = 0; i < 9; i++) {
-		int num = sudoku[i][col];
-		if (num < 1 || num > 9 || validityArray[num - 1] == 1) {
-			pthread_exit(NULL);
-		} else {
-			validityArray[num - 1] = 1;		
+void *printPuzzle(){
+	for (int i = 0; i < 9; i++){
+		printf("\n\n");
+		for (int j = 0; j < 9; j++){	
+			printf("%d   ", sudoku[i][j]);
 		}
 	}
-
-	valid[18 + col] = 1;
 	pthread_exit(NULL);
 }
 
-
-void *isRowValid(void* param) {
+void *checkRow(void *param){
 
 	parameters *params = (parameters*) param;
 	int row = params->row;
 	int col = params->column;		
-	if (col != 0 || row > 8) {
-		fprintf(stderr, "Invalid row or column for row subsection! row=%d, col=%d\n", row, col);
+	if (col != 0 || row > 8){
+		fprintf(stderr, "Invalid row or column for row subsection.\nRow:%d, Col:%d\n", row, col);
 		pthread_exit(NULL);
 	}
 
-
 	int validityArray[9] = {0};
-	int i;
-	for (i = 0; i < 9; i++) {
+
+	for (int i = 0; i < 9; i++){
 
 		int num = sudoku[row][i];
 		if (num < 1 || num > 9 || validityArray[num - 1] == 1) {
@@ -79,22 +62,45 @@ void *isRowValid(void* param) {
 	pthread_exit(NULL);
 }
 
-
-void *is3x3Valid(void* param) {
+void *checkColumn(void* param){
 
 	parameters *params = (parameters*) param;
 	int row = params->row;
 	int col = params->column;		
-	if (row > 6 || row % 3 != 0 || col > 6 || col % 3 != 0) {
-		fprintf(stderr, "Invalid row or column for subsection! row=%d, col=%d\n", row, col);
+	if (row != 0 || col > 8){
+		fprintf(stderr, "Invalid row or column for col subsection.\nRow:%d, Col:%d\n", row, col);
+		pthread_exit(NULL);
+	}
+
+	int validityArray[9] = {0};
+	for (int i = 0; i < 9; i++){
+		int num = sudoku[i][col];
+		if (num < 1 || num > 9 || validityArray[num - 1] == 1) {
+			pthread_exit(NULL);
+		} else {
+			validityArray[num - 1] = 1;		
+		}
+	}
+
+	valid[18 + col] = 1;
+	pthread_exit(NULL);
+}
+
+void *checkSubGrid(void* param){
+
+	parameters *params = (parameters*) param;
+	int row = params->row;
+	int col = params->column;		
+	if (row > 6 || row % 3 != 0 || col > 6 || col % 3 != 0){
+		fprintf(stderr, "Invalid row or column for subsection.\nRow:%d, Col:%d\n", row, col);
 		pthread_exit(NULL);
 	}
 	int validityArray[9] = {0};
-	int i, j;
-	for (i = row; i < row + 3; i++) {
-		for (j = col; j < col + 3; j++) {
+
+	for (int i = row; i < row + 3; i++){
+		for (int j = col; j < col + 3; j++){
 			int num = sudoku[i][j];
-			if (num < 1 || num > 9 || validityArray[num - 1] == 1) {
+			if (num < 1 || num > 9 || validityArray[num - 1] == 1){
 				pthread_exit(NULL);
 			} else {
 				validityArray[num - 1] = 1;		
@@ -106,45 +112,42 @@ void *is3x3Valid(void* param) {
 	pthread_exit(NULL);
 }
 
-int main() {	
+int main(){	
 	pthread_t threads[thread_num];
 	
-	int threadIndex = 0;	
-	int i,j;
+	int threadIndex = 0;
+	pthread_create(&threads[threadIndex++], NULL, printPuzzle, NULL);
 
-	for (i = 0; i < 9; i++) {
-		for (j = 0; j < 9; j++) {						
-			if (i%3 == 0 && j%3 == 0) {
-				parameters *data = (parameters *) malloc(sizeof(parameters));	
-				data->row = i;		
-				data->column = j;
-				pthread_create(&threads[threadIndex++], NULL, is3x3Valid, data);
+	for (int i = 0; i < 9; i++){
+		for (int j = 0; j < 9; j++){	
+			parameters *params = (parameters *) malloc(sizeof(parameters));					
+			params->row = i;		
+			params->column = j;
+
+			if (j == 0){
+				pthread_create(&threads[threadIndex++], NULL, checkRow, params);
 			}
-			if (i == 0) {
-				parameters *columnData = (parameters *) malloc(sizeof(parameters));	
-				columnData->row = i;		
-				columnData->column = j;
-				pthread_create(&threads[threadIndex++], NULL, isColumnValid, columnData);
+
+			if (i == 0){
+				pthread_create(&threads[threadIndex++], NULL, checkColumn, params);
 			}
-			if (j == 0) {
-				parameters *rowData = (parameters *) malloc(sizeof(parameters));	
-				rowData->row = i;		
-				rowData->column = j;
-				pthread_create(&threads[threadIndex++], NULL, isRowValid, rowData);
+			
+			if (i%3 == 0 && j%3 == 0){
+				pthread_create(&threads[threadIndex++], NULL, checkSubGrid, params);
 			}
 		}
 	}
 
-	for (i = 0; i < thread_num; i++) {
+	for (int i = 0; i < thread_num; i++){
 		pthread_join(threads[i], NULL);			
 	}
 
-	for (i = 0; i < thread_num; i++) {
-		if (valid[i] == 0) {
-			printf("Sudoku solution is invalid!\n");
+	for (int i = 0; i < thread_num; i++){
+		if (valid[i] == 0){
+			printf("\n\nThe sudoku solution is invalid.\n");
 			return EXIT_SUCCESS;
 		}
 	}
-	printf("Sudoku solution is valid!\n");
+	printf("\n\nThe sudoku solution is valid.\n");
 	return EXIT_SUCCESS;
 }
