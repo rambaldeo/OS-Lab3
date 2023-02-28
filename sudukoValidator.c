@@ -11,7 +11,6 @@ typedef struct {
 	int column;		
 } parameters;
 
-
 int sudoku[9][9] = {
 	{5, 3, 4, 6, 7, 8, 9, 1, 2},
 	{6, 7, 2, 1, 9, 5, 3, 4, 8},
@@ -45,6 +44,7 @@ void *printPuzzle(){
 
 		}
 	}
+	
 	pthread_exit(NULL);
 }
 
@@ -54,7 +54,7 @@ void *checkRow(void *param){
 	int row = params->row;
 	int col = params->column;		
 	if (col != 0 || row > 8){
-		fprintf(stderr, "Invalid row or column for row subsection.\nRow:%d, Col:%d\n", row, col);
+		printf("Invalid column pointer index or row inspection argument.\nRow:%d, Col:%d\n", row, col);
 		pthread_exit(NULL);
 	}
 
@@ -80,16 +80,24 @@ void *checkColumn(void* param){
 	int row = params->row;
 	int col = params->column;		
 	if (row != 0 || col > 8){
-		fprintf(stderr, "Invalid row or column for col subsection.\nRow:%d, Col:%d\n", row, col);
+		printf("\nInvalid row pointer index or column inspection argument.\nRow:%d, Col:%d\n", row, col);
 		pthread_exit(NULL);
 	}
 
 	int validityArray[9] = {0};
 	for (int i = 0; i < 9; i++){
 		int num = sudoku[i][col];
-		if (num < 1 || num > 9 || validityArray[num - 1] == 1) {
+		if (num < 1 || num > 9){
+			printf("\nInvalid entry. (Row:%d, Col:%d)\n", row, col);
 			pthread_exit(NULL);
-		} else {
+		} 
+		
+		else if(validityArray[num - 1] == 1) {
+			printf("\nRepeated value found in column. (Col:%d)\n", i);
+			pthread_exit(NULL);
+		} 
+		
+		else {
 			validityArray[num - 1] = 1;		
 		}
 	}
@@ -102,9 +110,10 @@ void *checkSubGrid(void* param){
 
 	parameters *params = (parameters*) param;
 	int row = params->row;
-	int col = params->column;		
+	int col = params->column;
+
 	if (row > 6 || row % 3 != 0 || col > 6 || col % 3 != 0){
-		fprintf(stderr, "Invalid row or column for subsection.\nRow:%d, Col:%d\n", row, col);
+		printf("\nInvalid row or column argument.\nRow:%d, Col:%d\n", row, col);
 		pthread_exit(NULL);
 	}
 	int validityArray[9] = {0};
@@ -112,9 +121,17 @@ void *checkSubGrid(void* param){
 	for (int i = row; i < row + 3; i++){
 		for (int j = col; j < col + 3; j++){
 			int num = sudoku[i][j];
-			if (num < 1 || num > 9 || validityArray[num - 1] == 1){
+			if (num < 1 || num > 9 ){
+				printf("\nInvalid entry. (Row:%d, Col:%d)\n", row, col);
 				pthread_exit(NULL);
-			} else {
+			} 
+			
+			else if (validityArray[num - 1] == 1){
+				printf("\nRepeated value found in subgrid. (Row:%d, Col:%d)\n", row, col);
+				pthread_exit(NULL);
+			} 
+			
+			else {
 				validityArray[num - 1] = 1;		
 			}
 		}
@@ -157,7 +174,7 @@ int main(){
 		pthread_join(threads[i], NULL);			
 	}
 
-	for (int i = 0; i < thread_num; i++){
+	for (int i = 0; i < thread_num-1; i++){
 		if (valid[i] == 0){
 			printf("\n\nThe sudoku solution is invalid.\n");
 			return EXIT_SUCCESS;
